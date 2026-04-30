@@ -6,18 +6,18 @@ CorrectResult=true
 function insertCsv() {
     folderName=$(basename "$PWD")
     
-    # -F',' indique à awk que le séparateur est la virgule
+    # -F'_' indique à awk que le séparateur est la virgule
     surname=$(echo "$folderName" | awk -F '_' '{print $1}')
     firstname=$(echo "$folderName" | awk -F '_' '{print $2}')
 
-    if [ -f notes.csv ]; then
-        if ! head -n 1 notes.csv | grep -q "Nom"; then
-            echo -e "Nom,Prénom,Note\n$surname'$firstname'$finalNote" >> notes.csv
+    if [ -f note.csv ]; then
+        if ! head -n 1 note.csv | grep -q "Nom"; then
+            echo -e "Nom,Prénom,Note\n'$surname','$firstname','$finalNote'" >> note.csv
         else
-            echo "$surname'$firstname'$finalNote" >> notes.csv
+            echo "'$surname','$firstname','$finalNote'" >> note.csv
         fi
     else
-        echo "Nom,Prénom,Note" > notes.csv
+        echo -e "Nom,Prénom,Note\n'$surname','$firstname','$finalNote'" >> note.csv
     fi
 }
 
@@ -97,6 +97,12 @@ BEGIN {
         indent = 0; error = 0 
     }
 {   
+    # Vérifie si une accolade n est pas à la ligne
+    if ($0 ~ /[^[:space:]].*[{}]/) {
+        error = 1;
+        exit 1;
+    }
+
     # Le ~ cherche si l accolade fermante est présent dans la ligne actuelle
     # ~ = correspond à
     if ($0 ~ /}/) { 
@@ -142,4 +148,4 @@ fi
 
 insertCsv
 
-echo "$finalNote/20 de $firstname $surname envoyée dans notes.csv"
+echo "$finalNote/20 de $firstname $surname envoyée dans note.csv"
