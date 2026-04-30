@@ -103,8 +103,10 @@ else
 fi
 
 # -F',' indique à awk que le séparateur est la virgule
-surname=$(awk -F',' '{print $1}' readme.txt)
-firstname=$(awk -F',' '{print $2}' readme.txt)
+folderName=$(basename "$PWD")
+
+surname=$(echo "$folderName" | awk -F '_' '{print $1}')
+firstname=$(echo "$folderName" | awk -F '_' '{print $2}')
 
 make clean > /dev/null 2>&1
 if [ -f "./factorielle" ]; then
