@@ -114,8 +114,8 @@ BEGIN {
     
     # Si la ligne n est pas vide et ne respecte pas le regex il y a une erreur
     # !~ = ne correspond pas à
-    # /^[ \t]*$/ est un regex pour les espaces/tabulation sur une ligne vide
-    if (length($0) > 0 && $0 !~ /^[ \t]*$/ && $0 !~ regex && $0 !~ /^}/){
+    # /^[[:space:]]*$/ est un regex pour les espaces sur une ligne vide
+    if (length($0) > 0 && $0 !~ /^[[:space:]]*$/ && $0 !~ regex && $0 !~ /^}/){
         error = 1;
         exit 1
     }
