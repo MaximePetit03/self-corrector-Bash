@@ -114,8 +114,8 @@ BEGIN {
     
     # Si la ligne n est pas vide et ne respecte pas le regex il y a une erreur
     # !~ = ne correspond pas à
-    # /^[[:space:]]*$ est un regex pour les espaces sur une ligne vide
-    if (length($0) > 0 && $0 !~ /^[[:space:]]*$/ && $0 !~ regex && $0 !~ /^}/){
+    # /^[ \t]*$/ est un regex pour les espaces/tabulation sur une ligne vide
+    if (length($0) > 0 && $0 !~ /^[ \t]*$/ && $0 !~ regex && $0 !~ /^}/){
         error = 1;
         exit 1
     }
@@ -125,7 +125,10 @@ BEGIN {
         indent += 2 
     }
 }
-END { if (error == 1) exit 1 }' main.c 2>/dev/null; then
+END { 
+if (error == 1) 
+    exit 1 
+}' main.c 2>/dev/null; then
     echo "Indentation : OK"
 else
     finalNote=$((finalNote - 2))
