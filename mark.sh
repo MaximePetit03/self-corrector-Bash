@@ -102,10 +102,25 @@ else
     finalNote=$((finalNote - 2))
 fi
 
+# -F',' indique à awk que le séparateur est la virgule
+surname=$(awk -F',' '{print $1}' readme.txt)
+firstname=$(awk -F',' '{print $2}' readme.txt)
+
 make clean > /dev/null 2>&1
 if [ -f "./factorielle" ]; then
     echo "Make clean ne marche pas"
     finalNote=$((finalNote - 2))
 fi
 
-echo "Note finale : $finalNote/20"
+
+if [ -f notes.csv ]; then
+    if ! head -n 1 notes.csv | grep -q "Nom"; then
+        echo -e "Nom,Prenom,Note\n$surname,$firstname,$finalNote" >> notes.csv
+    else
+        echo "$surname,$firstname,$finalNote" >> notes.csv
+    fi
+else
+    echo "Nom,Prenom,Note" > notes.csv
+fi
+
+echo "$finalNote/20 de $firstname $surname envoyée dans notes.csv"
