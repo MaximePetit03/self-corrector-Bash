@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 finalNote=0
 CorrectResult=true
@@ -10,8 +10,22 @@ if [ -f "./factorielle" ]; then
     echo "Compilation ok"
     finalNote=$((finalNote + 2))
 else 
+    echo "Erreur de compilation"
     finalNote=0
-    exit 1
+    folderName=$(basename "$PWD")
+    surname=$(echo "$folderName" | awk -F '_' '{print $1}')
+    firstname=$(echo "$folderName" | awk -F '_' '{print $2}')
+    
+    if [ -f notes.csv ]; then
+        if ! head -n 1 notes.csv | grep -q "Nom"; then
+            echo -e "Nom,Prénom,Note\n$surname'$firstname'$finalNote" >> notes.csv
+        else
+            echo "$surname'$firstname'$finalNote" >> notes.csv
+        fi
+    else
+        echo "Nom,Prénom,Note" > notes.csv
+    fi
+        exit 1
 fi
 
 # 2>&1 redirige fusionne les erreurs avec la sortie standard
@@ -56,11 +70,18 @@ if [ "$NegativeNumberError" = "Erreur: nombre negatif" ]; then
     finalNote=$((finalNote + 4))
 fi
 
+filesToTest="main.c"
+[ -f "header.h" ] && filesToTest="main.c header.h"
+
 # Redirige les erreurs de fichier vers /dev/null et on test si y a la sortie 1
 # 2 étant les erreurs et 1 le bon résultat
-if awk 'length($0) > 80 {exit 1} ' main.c header.h 2>/dev/null; then
+if awk 'length($0) > 80 {exit 1} ' $filesToTest 2>/dev/null; then
     echo "80 char par ligne ok"
 else
+    finalNote=$((finalNote - 2))
+fi
+
+if [ ! -f header.h ]; then
     finalNote=$((finalNote - 2))
 fi
 
@@ -88,7 +109,8 @@ BEGIN {
     # !~ = ne correspond pas à
     # /^[[:space:]]*$ est un regex pour les espaces sur une ligne vide
     if (length($0) > 0 && $0 !~ /^[[:space:]]*$/ && $0 !~ regex && $0 !~ /^}/){
-        error = 1; exit 1
+        error = 1;
+        exit 1
     }
 
     # Si la ligne contient une accolade ouvrante, on augmente l indent désiré
@@ -102,9 +124,9 @@ else
     finalNote=$((finalNote - 2))
 fi
 
-# -F',' indique à awk que le séparateur est la virgule
-folderName=$(basename "$PWD")
 
+folderName=$(basename "$PWD")
+# -F',' indique à awk que le séparateur est la virgule
 surname=$(echo "$folderName" | awk -F '_' '{print $1}')
 firstname=$(echo "$folderName" | awk -F '_' '{print $2}')
 
@@ -117,12 +139,12 @@ fi
 
 if [ -f notes.csv ]; then
     if ! head -n 1 notes.csv | grep -q "Nom"; then
-        echo -e "Nom,Prenom,Note\n$surname,$firstname,$finalNote" >> notes.csv
+        echo -e "Nom,Prénom,Note\n$surname'$firstname'$finalNote" >> notes.csv
     else
-        echo "$surname,$firstname,$finalNote" >> notes.csv
+        echo "$surname'$firstname'$finalNote" >> notes.csv
     fi
 else
-    echo "Nom,Prenom,Note" > notes.csv
+    echo "Nom,Prénom,Note" > notes.csv
 fi
 
 echo "$finalNote/20 de $firstname $surname envoyée dans notes.csv"
