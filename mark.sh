@@ -1,7 +1,25 @@
-#!/bin/sh
+#!/bin/bash
 
 finalNote=0
 CorrectResult=true
+
+function insertCsv() {
+    folderName=$(basename "$PWD")
+    
+    # -F',' indique à awk que le séparateur est la virgule
+    surname=$(echo "$folderName" | awk -F '_' '{print $1}')
+    firstname=$(echo "$folderName" | awk -F '_' '{print $2}')
+
+    if [ -f notes.csv ]; then
+        if ! head -n 1 notes.csv | grep -q "Nom"; then
+            echo -e "Nom,Prénom,Note\n$surname'$firstname'$finalNote" >> notes.csv
+        else
+            echo "$surname'$firstname'$finalNote" >> notes.csv
+        fi
+    else
+        echo "Nom,Prénom,Note" > notes.csv
+    fi
+}
 
 # On redirige tout résultat de la compilation dans dev/null 
 make > /dev/null 2>&1
@@ -12,20 +30,9 @@ if [ -f "./factorielle" ]; then
 else 
     echo "Erreur de compilation"
     finalNote=0
-    folderName=$(basename "$PWD")
-    surname=$(echo "$folderName" | awk -F '_' '{print $1}')
-    firstname=$(echo "$folderName" | awk -F '_' '{print $2}')
-    
-    if [ -f notes.csv ]; then
-        if ! head -n 1 notes.csv | grep -q "Nom"; then
-            echo -e "Nom,Prénom,Note\n$surname'$firstname'$finalNote" >> notes.csv
-        else
-            echo "$surname'$firstname'$finalNote" >> notes.csv
-        fi
-    else
-        echo "Nom,Prénom,Note" > notes.csv
-    fi
-        exit 1
+
+    insertCsv
+    exit 1
 fi
 
 # 2>&1 redirige fusionne les erreurs avec la sortie standard
@@ -124,27 +131,12 @@ else
     finalNote=$((finalNote - 2))
 fi
 
-
-folderName=$(basename "$PWD")
-# -F',' indique à awk que le séparateur est la virgule
-surname=$(echo "$folderName" | awk -F '_' '{print $1}')
-firstname=$(echo "$folderName" | awk -F '_' '{print $2}')
-
 make clean > /dev/null 2>&1
 if [ -f "./factorielle" ]; then
     echo "Make clean ne marche pas"
     finalNote=$((finalNote - 2))
 fi
 
-
-if [ -f notes.csv ]; then
-    if ! head -n 1 notes.csv | grep -q "Nom"; then
-        echo -e "Nom,Prénom,Note\n$surname'$firstname'$finalNote" >> notes.csv
-    else
-        echo "$surname'$firstname'$finalNote" >> notes.csv
-    fi
-else
-    echo "Nom,Prénom,Note" > notes.csv
-fi
+insertCsv
 
 echo "$finalNote/20 de $firstname $surname envoyée dans notes.csv"
