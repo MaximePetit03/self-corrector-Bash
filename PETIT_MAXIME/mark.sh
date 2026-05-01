@@ -109,8 +109,8 @@ BEGIN {
         indent -= 2 
     }
     
-    # On vérifie si la ligne commence par le bon nombre d espaces
-    # ^ représente le début de ligne et on répète les espaces d indent
+    # ^ représente le début de ligne et on répète les espaces d indentation
+    # Créer un regex type "^    [^ ]" (début de ligne + X espaces + caractère)
     regex = "^"
     for (i = 0; i < indent; i++) { 
         regex = regex " " 
